@@ -72,7 +72,7 @@ public class Calculadora extends JFrame {
                 boton.setBackground(Color.LIGHT_GRAY);
             }
             else if (etiqueta.equals("=")) {
-                boton.setBackground(Color.BLUE);
+                boton.setBackground(Color.WHITE);
 
             }
             else {
