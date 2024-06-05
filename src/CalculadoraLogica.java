@@ -1,48 +1,62 @@
 import javax.swing.*;
 import java.util.Stack;
 
-public class CalculadoraLogica {
+class CalculadoraLogica {
     private Stack<Double> numeros = new Stack<>();
     private Stack<String> operadores = new Stack<>();
 
-    public void procesarEntrada(String comando, JTextField displayResultado, JTextField displayOperaciones) {
+    public void actualizarDisplayOperaciones(String tecla, JTextField displayOperaciones) {
+        String textoActual = displayOperaciones.getText();
+
+        if (tecla.matches("[0-9]")) {
+            if (textoActual.replaceAll("[^0-9]", "").length() < 12) {
+                displayOperaciones.setText(textoActual + tecla);
+            }
+        } else if (tecla.equals(".") && !textoActual.endsWith(".") && !textoActual.contains(".")) {
+            displayOperaciones.setText(textoActual + tecla);
+        } else if (tecla.matches("[+\\-*/]")) {
+            if (!textoActual.isEmpty() && !textoActual.matches("[+\\-*/]$")) {
+                displayOperaciones.setText(textoActual + " " + tecla + " ");
+            }
+        } else if (tecla.equals("C")) {
+            displayOperaciones.setText("");
+        }
+    }
+
+    public void procesarEntrada(String tecla, JTextField displayResultado) {
         try {
-            if (comando.matches("[0-9.]")) {
-                displayResultado.setText(displayResultado.getText() + comando);
-            } else if (comando.matches("[+\\-*/]")) {
+            if (tecla.matches("[0-9]")) {
+                if (displayResultado.getText().replaceAll("[^0-9]", "").length() < 12) {
+                    displayResultado.setText(displayResultado.getText() + tecla);
+                }
+            } else if (tecla.equals(".") && !displayResultado.getText().contains(".")) {
+                displayResultado.setText(displayResultado.getText() + tecla);
+            } else if (tecla.matches("[+\\-*/]")) {
                 if (!displayResultado.getText().isEmpty()) {
                     numeros.push(Double.parseDouble(displayResultado.getText()));
-                    if (!operadores.isEmpty() && !tienePrioridad(comando, operadores.peek())) {
-                        calcularOperacion(displayResultado, displayOperaciones);
+                    if (!operadores.isEmpty() && !tienePrioridad(tecla, operadores.peek())) {
+                        calcularOperacion(displayResultado);
                     }
-                    displayOperaciones.setText(displayOperaciones.getText() + " " + displayResultado.getText() + " " + comando + " ");
                     displayResultado.setText("");
-                } else {
-                    if (!operadores.isEmpty()) {
-                        operadores.pop();
-                        displayOperaciones.setText(displayOperaciones.getText().substring(0, displayOperaciones.getText().length() - 3) + " " + comando + " ");
-                    }
                 }
-                operadores.push(comando);
-            } else if (comando.equals("=")) {
+                operadores.push(tecla);
+            } else if (tecla.equals("=")) {
                 if (!displayResultado.getText().isEmpty()) {
                     numeros.push(Double.parseDouble(displayResultado.getText()));
                 }
                 while (!operadores.isEmpty() && numeros.size() >= 2) {
-                    calcularOperacion(displayResultado, displayOperaciones);
+                    calcularOperacion(displayResultado);
                 }
                 if (!numeros.isEmpty()) {
                     displayResultado.setText(String.format("%.2f", numeros.pop()));
-                    displayOperaciones.setText("");
                 } else {
-                    displayResultado.setText("Error de sintaxis");
+                    displayResultado.setText("Error: Entrada incompleta");
                 }
-            } else if (comando.equals("C")) {
+            } else if (tecla.equals("C")) {
                 displayResultado.setText("");
-                displayOperaciones.setText("");
                 numeros.clear();
                 operadores.clear();
-            } else if (comando.equals("CE")) {
+            } else if (tecla.equals("CE")) {
                 String textoActual = displayResultado.getText();
                 if (!textoActual.isEmpty()) {
                     displayResultado.setText(textoActual.substring(0, textoActual.length() - 1));
@@ -55,18 +69,13 @@ public class CalculadoraLogica {
         }
     }
 
-    private void calcularOperacion(JTextField displayResultado, JTextField displayOperaciones) {
+    private void calcularOperacion(JTextField displayResultado) {
         if (numeros.size() >= 2 && operadores.size() >= 1) {
             double num2 = numeros.pop();
             double num1 = numeros.pop();
             String operador = operadores.pop();
             double resultado = calcular(num1, num2, operador);
             numeros.push(resultado);
-            if (!operadores.isEmpty()) {
-                displayOperaciones.setText(displayOperaciones.getText() + " " + String.format("%.2f", resultado));
-            } else {
-                displayOperaciones.setText("");
-            }
             displayResultado.setText(String.format("%.2f", resultado));
         }
     }

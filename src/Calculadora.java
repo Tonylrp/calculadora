@@ -1,13 +1,12 @@
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
 public class Calculadora extends JFrame {
-    public JPanel panelPantallas, panelBotones;
+    private JPanel panelPantallas, panelBotones;
     private JTextField displayOperaciones, displayResultado;
     private CalculadoraLogica logica;
 
@@ -25,7 +24,7 @@ public class Calculadora extends JFrame {
         this.setLayout(new BorderLayout());
         this.getContentPane().setBackground(Color.DARK_GRAY);
 
-        // Panel para las pantallas
+        // Panel for the displays
         panelPantallas = new JPanel(new BorderLayout());
         panelPantallas.setBackground(Color.DARK_GRAY);
         panelPantallas.setPreferredSize(new Dimension(300, 130));
@@ -46,6 +45,7 @@ public class Calculadora extends JFrame {
 
         this.add(panelPantallas, BorderLayout.NORTH);
 
+        // Panel for the buttons
         panelBotones = new JPanel(new GridBagLayout());
         panelBotones.setBackground(Color.DARK_GRAY);
         GridBagConstraints gbc = new GridBagConstraints();
@@ -61,7 +61,6 @@ public class Calculadora extends JFrame {
                 "C", "CE", "=", ""
         };
 
-
         int i = 0;
         for (String etiqueta : etiquetasBotones) {
             JButton boton = new JButton(etiqueta);
@@ -70,14 +69,42 @@ public class Calculadora extends JFrame {
 
             if ("+-*/CCE".contains(etiqueta)) {
                 boton.setBackground(Color.LIGHT_GRAY);
-            }
-            else if (etiqueta.equals("=")) {
-                boton.setBackground(Color.WHITE);
-
-            }
-            else {
+            } else if (etiqueta.equals("=")) {
+                boton.setBackground(Color.BLUE);
+                boton.setForeground(Color.WHITE);
+            } else {
                 boton.setBackground(Color.GRAY);
             }
+
+            // Hover and click effect
+            boton.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    boton.setBackground(Color.DARK_GRAY);
+
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    if ("+-*/CCE".contains(etiqueta)) {
+                        boton.setBackground(Color.LIGHT_GRAY);
+                    } else if (etiqueta.equals("=")) {
+                        boton.setBackground(Color.BLUE);
+                    } else {
+                        boton.setBackground(Color.GRAY);
+                    }
+                }
+            });
+
+            boton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    String tecla = e.getActionCommand();
+                    logica.procesarEntrada(tecla, displayResultado);
+                    logica.actualizarDisplayOperaciones(tecla, displayOperaciones);
+                    boton.setBackground(Color.DARK_GRAY);
+                }
+            });
 
             gbc.gridx = i % 4;
             gbc.gridy = i / 4;
@@ -91,14 +118,6 @@ public class Calculadora extends JFrame {
             } else {
                 gbc.gridwidth = 1;
             }
-
-            boton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    String comando = e.getActionCommand();
-                    logica.procesarEntrada(comando, displayResultado, displayOperaciones);
-                }
-            });
 
             panelBotones.add(boton, gbc);
             i++;
